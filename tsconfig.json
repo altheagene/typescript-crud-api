@@ -2,6 +2,10 @@
   // Visit https://aka.ms/tsconfig to read more about this file
   "compilerOptions": {
     // File Layout
+    "lib": ["ES2020"],
+    "module": "commonjs",
+    "target": "ES2020",
+    "types": [],
     "rootDir": "./src",
     "outDir": "./dist",
     "strict": true,
@@ -14,16 +18,12 @@
       "_helpers/*" : ["_helpers/*"],
       "_middleware/*" : ["_middleware/*"],
       "users/*" : ["users/*"]
-    },
-    "include" : ["src/**/*"],
-    "exclude" : ["node_modules", "dist"],
+    }
+  
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
-    "module": "commonjs",
-    "target": "ES2020",
-    "types": [],
     // For nodejs:
-    "lib": ["ES2020"],
+
     // "types": ["node"],
     // and npm install -D @types/node
 
@@ -51,5 +51,7 @@
     // "noUncheckedSideEffectImports": true,
     // "moduleDetection": "force",
     // "skipLibCheck": true,
-  }
+  },
+    "include" : ["src/**/*"],
+    "exclude" : ["node_modules", "dist"],
 }
