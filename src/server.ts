@@ -17,6 +17,9 @@ app.use('/users', usersController);
 //Global Error Handler (must be last)
 app.use(errorHandler);
 
+app.get('/ping', (req, res) => {
+  res.send("pong");
+});
 //Start server + initialize database
 const PORT = process.env.PORT || 4000;
 

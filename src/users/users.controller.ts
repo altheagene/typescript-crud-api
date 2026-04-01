@@ -11,10 +11,10 @@ const router = Router();
 router.get('/', getAll);
 router.get('/:id', getById);
 router.post('/', createSchema, create);
-router.put(':/id', updateSchema, update);
+router.put('/:id', updateSchema, update);
 router.delete('/:id', _delete);
 
-export default Router;
+export default router;
 
 function getAll(req: Request, res: Response, next: NextFunction): void {
     userService.getAll()

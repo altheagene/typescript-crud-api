@@ -5,9 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "ts-node tests/users/test.ts",
-    "build" : "tsc",
+    "build": "tsc",
     "start": "node dist/server.js",
-    "start:dev" : "nodemon --exec ts-node src/server.ts",
+    "start:dev": "nodemon --exec ts-node src/server.ts"
   },
   "keywords": [],
   "author": "",
@@ -16,6 +16,7 @@
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "cord": "^1.0.1",
+    "cors": "^2.8.6",
     "express": "^5.2.1",
     "joi": "^18.1.1",
     "jsonwebtoken": "^9.0.3",
