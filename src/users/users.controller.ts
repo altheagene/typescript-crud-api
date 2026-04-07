@@ -10,6 +10,7 @@ const router = Router();
 //routes
 router.get('/', getAll);
 router.get('/:id', getById);
+router.get('/:email', getByEmail);
 router.post('/', createSchema, create);
 router.put('/:id', updateSchema, update);
 router.delete('/:id', _delete);
@@ -24,6 +25,12 @@ function getAll(req: Request, res: Response, next: NextFunction): void {
 
 function getById(req: Request, res: Response, next: NextFunction): void {
     userService.getById(Number(req.params.id))
+    .then((user) => res.json(user))
+    .catch(next);
+}
+
+function getByEmail(req: Request, res: Response, next: NextFunction): void {
+    userService.getByEmail(req.params.email as string)
     .then((user) => res.json(user))
     .catch(next);
 }

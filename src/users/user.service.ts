@@ -6,6 +6,7 @@ import { User, UserCreationAttributes } from './user.model';
 export const userService = {
     getAll,
     getById,
+    getByEmail,
     create,
     update,
     delete: _delete,
@@ -17,6 +18,10 @@ async function getAll(): Promise<User[]> {
 
 async function getById(id : number) : Promise<User> {
     return await getUser(id);
+}
+
+async function getByEmail(email : string) : Promise<User> {
+    return await db.User.findOne({where : {email : email}});
 }
 
 async function create(params: UserCreationAttributes & {password:string}) : Promise<void> {

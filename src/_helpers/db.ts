@@ -1,9 +1,12 @@
+import employeeModel from 'employees/employee.model';
 import config from '../../config.json';
 import mysql from 'mysql2/promise';
 import {Sequelize} from 'sequelize';
 
 export interface Database{
     User:any;
+    Employee:any;
+    Department:any;
 }
 
 export const db: Database = {} as Database;
@@ -21,6 +24,10 @@ export async function initialize(): Promise<void>{
     //Initialize models
     const {default: userModel} = await import('../users/user.model');
     db.User = userModel(sequelize);
+    db.Employee = employeeModel(sequelize);
+
+    db.Employee.belongsTo(db.User, {foreignKey: 'userId'});
+    db.Employee.belongsTo(db.Department, {foreignKey: 'departmentId'});
 
     await sequelize.sync({alter: true});
 
