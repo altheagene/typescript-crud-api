@@ -59,7 +59,7 @@ export class Employee
                     type: DataTypes.DATE,
                     allowNull: false,
                     defaultValue: DataTypes.NOW
-                },q
+                },
                 updatedAt: {
                     type: DataTypes.DATE,
                     allowNull: false,
