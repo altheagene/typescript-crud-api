@@ -26,17 +26,18 @@ export async function initialize(): Promise<void>{
 
     //Connect to database with Sequelize
     const sequelize = new Sequelize(database, user, password, {dialect : 'mysql'});
-
+    db.sequelize = sequelize
     //Initialize models
     const {default: userModel} = await import('../users/user.model');
     db.User = userModel(sequelize);
     db.Employee = employeeModel(sequelize);
     db.Department = departmentModel(sequelize);
-    db.Request = departmentModel(sequelize);
-    db.RequestItem = departmentModel(sequelize)
+    db.Request = requestModel(sequelize);
+    db.RequestItem = requestItemModel(sequelize)
 
     db.Employee.belongsTo(db.User, {foreignKey: 'userId'});
-    db.Employee.belongsTo(db.Department, {foreignKey: 'departmentId'});
+    db.Employee.belongsTo(db.Department, {foreignKey: 'deptId'});
+    db.RequestItem.belongsTo(db.Request, {foreignKey: 'requestId'})
 
     await sequelize.sync({alter: true});
 

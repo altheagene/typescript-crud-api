@@ -47,6 +47,7 @@ function createSchema(req: Request, res: Response, next: NextFunction) : void{
         type: Joi.string().required(),
         userId: Joi.number().required(),
         status: Joi.string().valid(Status.Pending, Status.Approved, Status.Disapproved).default(Status.Pending).required(),
+        items: Joi.array().required()
     });
 
     validateRequest(req, next, schema);

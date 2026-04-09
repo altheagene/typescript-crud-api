@@ -24,7 +24,7 @@ async function getById(id: number): Promise<Request>{
 async function create(params: requestWithItems) : Promise<void>{
 
     const t = await db.sequelize.transaction();
-    const request = db.Request.create({
+    const request = await db.Request.create({
         userId: params.userId,
         type: params.type,
         status: params.status
@@ -35,11 +35,11 @@ async function create(params: requestWithItems) : Promise<void>{
 
     for(const i of params.items){{
         await db.RequestItem.create({
-            requestId: request.requestId,
+            requestId: request.id,
             item: i.item,
             quantity: i.quantity
         },
-        {trasaction : t})
+        {transaction : t})
     }}
 
     await t.commit();
