@@ -5,6 +5,8 @@ import { initialize } from './_helpers/db';
 import usersController from './users/users.controller';
 import employeesController from './employees/employee.controller';
 import departmentsController from './departments/department.controller';
+import requestsController from './requests/request.controller'
+import requestItemController from './requestItems/requestItem.controller'
 
 const app: Application = express();
 
@@ -17,6 +19,8 @@ app.use(cors());
 app.use('/users', usersController);
 app.use('/employees', employeesController);
 app.use('/departments', departmentsController);
+app.use('/requests', requestsController);
+app.use('/requestItems', requestItemController)
 
 //Global Error Handler (must be last)
 app.use(errorHandler);

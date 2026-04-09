@@ -3,11 +3,16 @@ import config from '../../config.json';
 import mysql from 'mysql2/promise';
 import {Sequelize} from 'sequelize';
 import departmentModel from '../departments/department.model';
+import requestItemModel from '../requestItems/requestItem.model';
+import requestModel from '../requests/request.model';
 
 export interface Database{
+    sequelize: Sequelize;
     User:any;
     Employee:any;
     Department:any;
+    Request: any;
+    RequestItem: any;
 }
 
 export const db: Database = {} as Database;
@@ -27,6 +32,8 @@ export async function initialize(): Promise<void>{
     db.User = userModel(sequelize);
     db.Employee = employeeModel(sequelize);
     db.Department = departmentModel(sequelize);
+    db.Request = departmentModel(sequelize);
+    db.RequestItem = departmentModel(sequelize)
 
     db.Employee.belongsTo(db.User, {foreignKey: 'userId'});
     db.Employee.belongsTo(db.Department, {foreignKey: 'departmentId'});
