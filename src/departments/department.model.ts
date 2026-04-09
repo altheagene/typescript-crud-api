@@ -1,4 +1,3 @@
-import { EmployeeAttributes } from "employees/employee.model";
 import { DataTypes, Model, Optional } from "sequelize";
 import type {Sequelize} from "sequelize";
 

@@ -1,7 +1,8 @@
-import employeeModel from 'employees/employee.model';
+import employeeModel from '../employees/employee.model';
 import config from '../../config.json';
 import mysql from 'mysql2/promise';
 import {Sequelize} from 'sequelize';
+import departmentModel from '../departments/department.model';
 
 export interface Database{
     User:any;
@@ -25,6 +26,7 @@ export async function initialize(): Promise<void>{
     const {default: userModel} = await import('../users/user.model');
     db.User = userModel(sequelize);
     db.Employee = employeeModel(sequelize);
+    db.Department = departmentModel(sequelize);
 
     db.Employee.belongsTo(db.User, {foreignKey: 'userId'});
     db.Employee.belongsTo(db.Department, {foreignKey: 'departmentId'});

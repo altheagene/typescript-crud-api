@@ -1,7 +1,7 @@
 import type {Request, Response, NextFunction} from 'express';
 import {Router} from 'express';
 import Joi, {valid} from 'joi';
-import { validateRequest } from '_middleware/validateRequest';
+import { validateRequest } from '../_middleware/validateRequest';
 import { departmentService } from './department.sevice';
 
 const router = Router();
@@ -11,6 +11,8 @@ router.get('/:id', getById);
 router.post('/', createSchema, create);
 router.put('/:id', updateSchema, update);
 router.delete('/:id', _delete);
+
+export default router;
 
 function getAll(req: Request, res: Response, next: NextFunction): void{
     departmentService.getAll()
@@ -54,6 +56,6 @@ function updateSchema(req: Request, res: Response, next: NextFunction):void{
         name: Joi.string().optional(),
         description: Joi.string().optional()
     });
-    
+
     validateRequest(req, next, schema);
 }

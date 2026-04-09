@@ -20,7 +20,6 @@ export interface UserCreationAttributes
 export class User
     extends Model<UserAttributes, UserCreationAttributes >
     implements UserAttributes{
-
         public id! : number;
         public email! : string;
         public passwordHash! : string;

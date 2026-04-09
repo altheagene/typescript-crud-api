@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import { Router } from "express";
 import Joi, {valid} from 'joi';
-import { validateRequest } from "_middleware/validateRequest";
+import { validateRequest } from "../_middleware/validateRequest";
 import { employeeService } from "./employee.service";
 
 const router = Router();
@@ -12,6 +12,8 @@ router.post('/', createSchema, create);
 router.put('/:id', updateSchema, update);
 router.delete('/:id', _delete);
  
+export default router;
+
 function getAll(req: Request, res: Response, next: NextFunction): void{
     employeeService.getAll()
         .then(employees => res.json(employees))

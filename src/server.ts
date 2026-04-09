@@ -3,6 +3,8 @@ import cors from 'cors';
 import { errorHandler } from './_middleware/errorHandler';
 import { initialize } from './_helpers/db';
 import usersController from './users/users.controller';
+import employeesController from './employees/employee.controller';
+import departmentsController from './departments/department.controller';
 
 const app: Application = express();
 
@@ -13,6 +15,8 @@ app.use(cors());
 
 //API Routes
 app.use('/users', usersController);
+app.use('/employees', employeesController);
+app.use('/departments', departmentsController);
 
 //Global Error Handler (must be last)
 app.use(errorHandler);

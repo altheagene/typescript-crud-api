@@ -1,4 +1,4 @@
-import { db } from "_helpers/db";
+import { db } from "../_helpers/db";
 import { Employee, EmployeeCreationAttributes } from "./employee.model";
 
 export const employeeService = {

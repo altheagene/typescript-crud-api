@@ -1,6 +1,7 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import type {Sequelize} from "sequelize";
 import {User} from '../users/user.model';
+import { Department } from "../departments/department.model";
 
 export interface EmployeeAttributes{
     id: number,
@@ -40,7 +41,7 @@ export class Employee
                 userId: {
                     type: DataTypes.INTEGER,
                     allowNull: false,
-                    references: { model: User, key: 'id' },
+                    references: { model: 'users', key: 'id' },
                     onDelete: 'CASCADE'
                 },
                 position: {
@@ -49,6 +50,7 @@ export class Employee
                 },
                 deptId:  {
                     type: DataTypes.INTEGER,
+                    references: { model: 'departments', key: 'id' },
                     allowNull:false
                 },
                 hireDate: {
@@ -76,4 +78,5 @@ export class Employee
 
         return Employee
     }
+
     
