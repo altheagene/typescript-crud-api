@@ -14,11 +14,15 @@ export function errorHandler(
     }
 
     if (err instanceof Error){
+
+        console.error('Error message:', err.message); // message only
+        console.error('Stack trace:', err.stack);      // stack trace
         //Standard error object
         return res.status(500).json({message : err.message});
     }
 
     //Fallback
+    console.error(err)
     return res.status(500).json({message : 'Internal server error'});
 }
 

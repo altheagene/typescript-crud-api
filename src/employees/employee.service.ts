@@ -18,7 +18,9 @@ interface CreateEmployeeParams {
 }
 
 async function getAll(): Promise<Employee[]>{
-    return await db.Employee.findAll();
+    return await db.Employee.findAll({
+        include:[db.User, db.Department]
+    });
 }
 
 async function getById(id : number):Promise<Employee | null>{

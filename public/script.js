@@ -297,7 +297,9 @@ async function setAuthState(isAuth){
         body.classList.add('authenticated');
         
         const token = sessionStorage.getItem('authToken');
-        const response = await fetch(`${server}/api/profile`,
+        const email = sessionStorage.getItem('email');
+        console.log(email)
+        const response = await fetch(`${server}/users/email/${encodeURIComponent(email)}`,
             {
                 method: 'GET',
                 headers: {
@@ -313,9 +315,10 @@ async function setAuthState(isAuth){
             user = response.user
         }
 
-        document.getElementById('role').textContent = data. user.firstName;
+        console.log(data)
+        document.getElementById('role').textContent = data.firstName;
 
-        if(data.user.role == 'admin'){
+        if(data.role == 'Admin'){
             body.classList.add('is-admin');
             
         }else{
@@ -333,7 +336,7 @@ async function setAuthState(isAuth){
 
 // =================== LOGIN, LOGOUT, REGITRATION =================
 async function handleRegistration(data){
-
+    
     let status = true;
     const password = data.password;
     const email = data.email;
@@ -370,38 +373,42 @@ async function handleRegistration(data){
         return;
     }
 
-    const response = await fetch(`${server}/api/register`, 
+    const response = await fetch(`${server}/users`, 
         {
             method: 'POST',
             headers: {
                 'Content-Type' : 'application/json'
             },
-            body: JSON.stringify({...data, verified: false})
+            body: JSON.stringify({
+                firstName: data.firstName,
+                lastName: data.lastName,
+                role: 'User',
+                title: 'Miss',
+                verified: 'false',
+                password: data.password,
+                confirmPassword: data.confirmPassword,
+                email : data.email
+            })
         }
     )
 
-    const resData = await response.json();
-
-    if(!resData.ok){
+    if(!response.ok){
         emailErrMsg.innerText = 'There is already an account with this email'
     }else{
         emailErrMsg.innerText = '';
         unverifiedEmail = data.email;
         navigateTo('#/verify-email');
     }
-
-    console.log(response);
-    
 }
 
 async function handleVerification(){
-    const response = await fetch(`${server}/api/verifyemail`,
+    const response = await fetch(`${server}/users/verify`,
         {
             method: 'POST',
             headers: {
                 'Content-Type' : 'application/json'
             },
-            body: JSON.stringify({unverifiedEmail})
+            body: JSON.stringify({email: unverifiedEmail})
         }
     ).then(res => res.json());
 
@@ -422,7 +429,7 @@ async function handleLogin(data){
     data.email = data.email.trim().toLowerCase();
 
     try{
-        const res = await fetch(`${server}/api/login`, 
+        const res = await fetch(`${server}/users/login`, 
             {
                 method: 'POST',
                 headers: {
@@ -436,7 +443,9 @@ async function handleLogin(data){
 
         if(res.ok){
             sessionStorage.setItem('authToken', resData.token);
-            sessionStorage.setItem('email', resData.user.email)
+            sessionStorage.setItem('email', resData.user.email);
+            sessionStorage.setItem('id', resData.user.id)
+           
             setAuthState(true)
             showToast('Logged in successfully!', true)
         }else{
@@ -458,7 +467,8 @@ function handleLogout(){
 
 async function renderProfile(){
 
-    const response = await fetch(`${server}/api/profile`, {
+    const userId = sessionStorage.getItem('id');
+    const response = await fetch(`${server}/users/${encodeURIComponent(userId)}`, {
         method: 'GET',
         headers: getAuthHeader()
     })
@@ -467,10 +477,10 @@ async function renderProfile(){
     console.log(data)
 
     if(response.ok){
-        document.getElementById('first-name').innerText = data.user.firstName;
-        document.getElementById('last-name').innerText = data.user.lastName
-        document.getElementById('profile-email').innerText = data.user.email;
-        document.getElementById('profile-role').innerText = data.user.role;
+        document.getElementById('first-name').innerText = data.firstName;
+        document.getElementById('last-name').innerText = data.lastName
+        document.getElementById('profile-email').innerText = data.email;
+        document.getElementById('profile-role').innerText = data.role;
 
         return true;
         
@@ -537,13 +547,14 @@ async function saveAccount(){
         data.verified = false;
     }
 
+
     //validate email format
     const validEmail = emailValidation(data.email.trim());
     element.innerText = validEmail ? '' : 'Invalid email!'
     status = validEmail
 
     //check if email exists already!
-    const account = await fetch(`${server}/api/admin/getaccount?email=${encodeURIComponent(data.email)}`,
+    const account = await fetch(`${server}/users/email/${encodeURIComponent(data.email)}`,
         {
             method: 'GET',
             headers: getAuthHeader(),
@@ -552,7 +563,7 @@ async function saveAccount(){
 
     const accountData = await account.json();
     
-    if(account.ok && accountData.exists && !editing){
+    if(account.ok && !editing){
         const element = document.getElementById('acc-email')
         element.textContent =  'Email already exists!';
         element.previousElementSibling.style.borderColor = 'red';
@@ -578,8 +589,10 @@ async function saveAccount(){
             element.innerText =  '';
         }
 
+        console.log(accountData.id)
+        console.log(data)
         try{
-            const response = await fetch(`${server}/api/admin/saveaccountedits`, {
+            const response = await fetch(`${server}/users/${accountData.id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type' : 'application/json',
@@ -594,7 +607,10 @@ async function saveAccount(){
                     editingEmail: editingEmail
                 })
             })
-            showToast("Successfully saved changes!", true);
+
+            console.log('hi')
+            if(response.ok)
+                showToast("Successfully saved changes!", true);
         }catch(err){
             console.log(err)
         }
@@ -646,15 +662,15 @@ function emailValidation(email){
     return emailRegEx.test(email);
 }
 
-async function editAccount(email){
+async function editAccount(id){
     try {
         document.getElementById('account-label-pass').classList.add('hide-msg')
         editing = true;
         editingEmail = email;
 
         console.log('EDIT!')
-
-        const response = await fetch(`${server}/api/admin/getaccount?email=${encodeURIComponent(editingEmail)}`, {
+        
+        const response = await fetch(`${server}/users/${encodeURIComponent(id)}`, {
             method: 'GET',
             headers: getAuthHeader()
         })
@@ -665,13 +681,12 @@ async function editAccount(email){
         console.log('DATA:', data)
 
         if(response.ok){
-            const user = data.user
-            accountsForm.elements['firstName'].value = user.firstName;
-            accountsForm.elements['lastName'].value = user.lastName;
-            accountsForm.elements['email'].value = user.email;
-            accountsForm.elements['password'].value = user.password;
-            accountsForm.elements['role'].value = user.role;
-            accountsForm.elements['verified-field'].checked = user.verified;
+            accountsForm.elements['firstName'].value = data.firstName;
+            accountsForm.elements['lastName'].value = data.lastName;
+            accountsForm.elements['email'].value = data.email;
+            accountsForm.elements['password'].value = data.password;
+            accountsForm.elements['role'].value = data.role;
+            accountsForm.elements['verified-field'].checked = data.verified;
             myAccModal.show();
         }
 
@@ -709,9 +724,9 @@ async function resetPassword(email){
 }
 
 
-async function deleteAccount(email){
-    const currentEmail = sessionStorage.getItem('email')
-    if (email === currentEmail){
+async function deleteAccount(id){
+    const currentId = sessionStorage.getItem('id')
+    if (id === currentId){
         showToast('You cannot delete your own account!', false)
         return;
     }else{
@@ -719,7 +734,7 @@ async function deleteAccount(email){
         if(confirm(`Are you sure you want to delete this acccount?`)){
             try {
                 // Call backend to check token and prevent self-deletion
-                const response = await fetch(`${server}/api/admin/deleteaccount/${encodeURIComponent(email)}`, {
+                const response = await fetch(`${server}/users/${encodeURIComponent(id)}`, {
                     method: 'DELETE',
                     headers: {
                         'Authorization': `Bearer ${sessionStorage.getItem('authToken')}`
@@ -747,7 +762,7 @@ async function renderAccounts(){
     const tbody = document.getElementById('accounts-tbody');
     tbody.innerHTML = ''
 
-    const response = await fetch(`${server}/api/admin/accounts`,
+    const response = await fetch(`${server}/users`,
         {
             method: 'GET',
             headers: getAuthHeader()
@@ -757,17 +772,17 @@ async function renderAccounts(){
     const data = await response.json()
     console.log(data)
     if(response.ok){
-        for (let account of data.accounts){
+        for (let account of data){
             const element = `
                 <tr>
                     <td>${account.firstName} ${account.lastName}</td>
                     <td>${account.email}</td>
-                    <td>${account.role == 'admin' ? 'Admin' : 'User'}</td>
+                    <td>${account.role =='Admin' ? 'Admin' : 'User'}</td>
                     <td>${account.verified ? '✅' : ' ❌'}</td>
                     <td>
-                        <button class="btn btn-outline-primary" onclick="editAccount('${account.email}')">Edit</button>
+                        <button class="btn btn-outline-primary" onclick="editAccount('${account.id}')">Edit</button>
                         <button class="btn btn-outline-warning" onclick="resetPassword('${account.email}')">Reset Password</button>
-                        <button class="btn btn-outline-danger" onclick="deleteAccount('${account.email}')">Delete</button>
+                        <button class="btn btn-outline-danger" onclick="deleteAccount('${account.id}')">Delete</button>
                     </td>
                 </tr>
             `
@@ -952,7 +967,7 @@ async function renderEmployees(){
     tbody.innerHTML =''
 
     try {
-        const response = await fetch(`${server}/api/admin/employees`, {
+        const response = await fetch(`${server}/employees`, {
             method: 'GET',
             headers: getAuthHeader()
         });
@@ -960,7 +975,7 @@ async function renderEmployees(){
         const data = await response.json();
         console.log("Data:", data);
         if(response.ok){
-            if(data.employees.length == 0){
+            if(data .length == 0){
                 const element = `
                     <tr>
                     <td colspan='5' class='text-center'>No employees found</td>  
@@ -971,13 +986,14 @@ async function renderEmployees(){
                 return true;
                 
             }
-            for(let employee of data.employees){
+            console.log(data)
+            for(let employee of data){
                 const element = `
                     <tr>
-                        <td>${employee.employeeID}</td>
-                        <td>${employee.firstName} ${employee.lastName}</td>
+                        <td>${employee.id}</td>
+                        <td>${employee.User.firstName} ${employee.User.lastName}</td>
                         <td>${employee.position}</td?>
-                        <td>${employee.deptName}</td>
+                        <td>${employee.Department.name}</td>
                         <td>
                             <button class="btn btn-outline-primary" onclick="editEmployee(${employee.id})">Edit</button>
                             <button class="btn btn-outline-warning" onclick="deleteEmployee(${employee.id})">Delete</button>
@@ -1002,7 +1018,7 @@ async function renderEmployees(){
 async function renderDeptDropdown(){
 
     //fetch departments
-    const response = await fetch(`${server}/api/admin/departments`,
+    const response = await fetch(`${server}/departments`,
         {
             method: 'GET',
             headers: getAuthHeader()
@@ -1018,7 +1034,7 @@ async function renderDeptDropdown(){
 
     //display departments dropdown
     employeesForm.elements['deptId'].innerHTML = ''
-    for(let department of departments){
+    for(let department of data){
         const element = `
             <option value=${department.deptId}>${department.name}</option>
         `
@@ -1212,7 +1228,7 @@ function addDepartment(){
 }
 
 async function renderDepartments(){
-    const response = await fetch(`${server}/api/admin/departments`,
+    const response = await fetch(`${server}/departments`,
         {
             method: 'GET',
             headers: getAuthHeader()
@@ -1220,18 +1236,17 @@ async function renderDepartments(){
     )
 
     const data = await response.json();
-    departments = data.departments;
     console.log(data)
     if(response.ok){
         const departments = data.departments;
         const tbody = document.getElementById('dept-tbody');
         tbody.innerHTML = ''
-        for (let i = 0; i < departments.length; i++){
+        for (let i = 0; i < data.length; i++){
             
             const element = `
                 <tr>
-                    <td>${departments[i].name}</td>
-                    <td>${departments[i].description}</td>
+                    <td>${data[i].name}</td>
+                    <td>${data[i].description}</td>
                     <td>
                         <button class="btn btn-outline-primary">Edit</button>
                         <button class="btn btn-outline-danger">Delete</button>

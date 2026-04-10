@@ -39,7 +39,7 @@ export async function initialize(): Promise<void>{
     db.Employee.belongsTo(db.Department, {foreignKey: 'deptId'});
     db.RequestItem.belongsTo(db.Request, {foreignKey: 'requestId'})
 
-    await sequelize.sync({alter: true});
+    await sequelize.sync();
 
     console.log('Database initialized and models synced');
 

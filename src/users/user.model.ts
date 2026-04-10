@@ -9,6 +9,7 @@ export interface UserAttributes{
     firstName: string;
     lastName: string;
     role: string;
+    verified: boolean;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -27,6 +28,7 @@ export class User
         public firstName! : string;
         public lastName! : string;
         public role! : string;
+        public verified!: boolean;
         public readonly createdAt! : Date;
         public readonly updatedAt! : Date;
     }
@@ -63,6 +65,10 @@ export class User
                 },
                 role: {
                     type: DataTypes.STRING,
+                    allowNull: false
+                },
+                verified: {
+                    type: DataTypes.BOOLEAN,
                     allowNull: false
                 },
                 createdAt: {
