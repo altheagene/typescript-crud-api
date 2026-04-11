@@ -16,7 +16,8 @@ export const userService = {
     update,
     delete: _delete,
     login,
-    verify
+    verify,
+    resetPassword
 };
 
 interface LoginParams{
@@ -108,18 +109,14 @@ async function update(id : number, params: Partial <UserCreationAttributes> & {p
     await user.update(params as Partial<UserCreationAttributes>);
 }
 
-async function resetPassword(id:number, currentPassword: string,newPassword : string) : Promise<void> {
-    const user = await db.User.findOne({where: {id: id}, attributes: ['passwordHash']});
+async function resetPassword(id:number, newPassword : string) : Promise<void> {
+    const user = await db.User.findByPk(id)
 
-    const match = await bcrypt.compare(currentPassword, user.passwordHash)
+    const newHashed = await bcrypt.hash(newPassword, 10);
+    await user.update({
+        passwordHash: newHashed
+    })
 
-    if(match){
-        const newHashed = await bcrypt.hash(newPassword, 10);
-
-        await db.User.update({
-            passwordHash: newHashed
-        })
-    }
 }
 
 async function _delete(id: number) : Promise<void> {

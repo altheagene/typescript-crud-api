@@ -5,6 +5,7 @@ import { Department } from "../departments/department.model";
 
 export interface EmployeeAttributes{
     id: number,
+    employeeId: number,
     userId: number,
     position: string,
     deptId: number,
@@ -21,6 +22,7 @@ export class Employee
     implements EmployeeAttributes{
         public id!:number;
         public userId!: number;
+        public employeeId!: number;
         public position!: string;
         public deptId!:number;
         public hireDate!: Date;
@@ -37,6 +39,10 @@ export class Employee
                     type: DataTypes.INTEGER,
                     autoIncrement: true,
                     primaryKey: true
+                },
+                employeeId: {
+                    type: DataTypes.STRING,
+                    allowNull: false
                 },
                 userId: {
                     type: DataTypes.INTEGER,

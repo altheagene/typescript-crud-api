@@ -4,6 +4,7 @@ import Joi, { valid } from 'joi';
 import { Role } from '../_helpers/role';
 import { validateRequest } from '../_middleware/validateRequest';
 import { userService } from './user.service';
+import { authenticateToken, authorizeRole } from '../_middleware/auth';
 
 const router = Router();
 
@@ -13,12 +14,19 @@ router.get('/:id', getById);
 router.get('/email/:email', getByEmail);
 router.post('/login', login);
 router.post('/verify', verify);
-router.post('/', createSchema, create);
-router.put('/:id', updateSchema, update);
-router.delete('/:id', _delete);
+router.post('/',authenticateToken, authorizeRole('Admin'), createSchema, create);
+router.post('/register', registerSchema, create);
+router.put('/:id', authenticateToken, authorizeRole('Admin'), updateSchema, update);
+router.put('/resetpassword/:id', authenticateToken, authorizeRole('Admin'), resetPassword );
+router.delete('/:id',authenticateToken, authorizeRole('Admin'), _delete);
 
 
 export default router;
+
+function resetPassword(req: Request, res: Response, next: NextFunction): void{
+    userService.resetPassword(Number(req.params.id), req.body.newPassword)
+        .then(() => res.json({message: 'Password successfully updated!'}))
+}
 
 function login(req: Request, res: Response, next: NextFunction): void{
     userService.login(req.body)
@@ -68,23 +76,34 @@ function _delete(req: Request, res: Response, next: NextFunction): void{
     .catch(next);
 }
 
-function createSchema(req: Request, res: Response, next: NextFunction): void{
+function registerSchema(req: Request, res: Response, next: NextFunction): void{
     const schema = Joi.object({
-        title: Joi.string().required(),
         firstName: Joi.string().required(),
         lastName: Joi.string().required(),
         role: Joi.string().valid(Role.Admin, Role.User).default(Role.User),
         email: Joi.string().email().required(),
-        verify: Joi.boolean().required(),
+        verified: Joi.boolean().required(),
         password: Joi.string().min(6).required(),
         confirmPassword: Joi.string().valid(Joi.ref('password')).required(),
     });
     validateRequest(req, next, schema);
 }
 
+function createSchema(req: Request, res: Response, next: NextFunction): void{
+    const schema = Joi.object({
+        firstName: Joi.string().required(),
+        lastName: Joi.string().required(),
+        role: Joi.string().valid(Role.Admin, Role.User).default(Role.User),
+        email: Joi.string().email().required(),
+        verified: Joi.boolean().required(),
+        password: Joi.string().min(6).required(),
+    });
+    validateRequest(req, next, schema);
+}
+
+
 function updateSchema(req: Request, res: Response, next: NextFunction): void {
     const schema = Joi.object({
-        title: Joi.string().empty(''),
         firstName: Joi.string().empty(''),
         lastName: Joi.string().empty(''),
         role: Joi.string().valid(Role.Admin, Role.User).empty(''),
@@ -95,3 +114,4 @@ function updateSchema(req: Request, res: Response, next: NextFunction): void {
     }).with('password', 'confirmPassword');
     validateRequest(req, next, schema);
 }
+

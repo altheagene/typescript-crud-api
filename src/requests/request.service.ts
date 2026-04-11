@@ -6,7 +6,8 @@ export const requestService ={
     getById,
     create,
     update,
-    _delete
+    _delete,
+    getByUserId
 }
 
 export interface requestWithItems extends RequestCreationAttributes{
@@ -19,6 +20,10 @@ async function getAll(): Promise<Request[]>{
 
 async function getById(id: number): Promise<Request>{
     return await db.Request.findByPk(id);
+}
+
+async function getByUserId(id:number) : Promise<Request[]>{
+    return await db.Request.findAll({where: {userId: id}})
 }
 
 async function create(params: requestWithItems) : Promise<void>{

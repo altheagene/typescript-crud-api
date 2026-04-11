@@ -34,7 +34,8 @@ export default function (sequelize : Sequelize): typeof RequestItem{
         requestId: {
             type: DataTypes.INTEGER,
             allowNull: false,
-            references: {model: 'requests', key: 'id'}
+            references: {model: 'requests', key: 'id'},
+            onDelete: 'CASCADE'
         },
         item: {
             type: DataTypes.STRING,

@@ -210,6 +210,7 @@ option{
 #toast-el{
     top: 60px;
     right: 2rem;
+    z-index: 55;
 }
 
 /* ================== FORM =========== */

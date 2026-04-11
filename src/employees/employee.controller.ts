@@ -3,16 +3,19 @@ import { Router } from "express";
 import Joi, {valid} from 'joi';
 import { validateRequest } from "../_middleware/validateRequest";
 import { employeeService } from "./employee.service";
+import { authenticateToken, authorizeRole } from "../_middleware/auth";
 
 const router = Router();
 
-router.get('/', getAll);
-router.get('/:id', getById);
-router.post('/', createSchema, create);
-router.put('/:id', updateSchema, update);
-router.delete('/:id', _delete);
+router.get('/', authenticateToken, authorizeRole('Admin'), getAll);
+router.get('/:id',authenticateToken, authorizeRole('Admin'), getById);
+router.post('/', createSchema,authenticateToken, authorizeRole('Admin') , create);
+router.put('/:id', updateSchema, authenticateToken, authorizeRole('Admin') ,  update);
+router.delete('/:id', authenticateToken, authorizeRole('Admin') ,  _delete);
+
  
 export default router;
+
 
 function getAll(req: Request, res: Response, next: NextFunction): void{
     employeeService.getAll()
@@ -46,6 +49,7 @@ function createSchema(req: Request, res: Response, next: NextFunction):void{
     const schema = Joi.object({
         email: Joi.string().email().required(),
         position: Joi.string().required(),
+        employeeId: Joi.string().required(),
         deptId: Joi.number().required(),
         hireDate: Joi.date().required()
     });
@@ -57,6 +61,7 @@ function updateSchema(req: Request, res: Response, next: NextFunction): void{
     const schema = Joi.object({
         email: Joi.string().optional(),
         position: Joi.string().optional(),
+        employeeId: Joi.string().optional(),
         deptId: Joi.number().optional(),
         hireDate: Joi.date().optional()
     });

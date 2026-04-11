@@ -10,8 +10,8 @@ export const employeeService = {
 }
 
 interface CreateEmployeeParams {
-    title: string;
     email: string;
+    employeeId: string;
     position: string;
     deptId: number;
     hireDate: Date;
@@ -45,6 +45,7 @@ async function create(params : CreateEmployeeParams):Promise<void>{
 
     await db.Employee.create({
         userId: user.id,
+        employeeId: params.employeeId,
         position: params.position,
         deptId: params.deptId,
         hireDate: params.hireDate
@@ -56,13 +57,14 @@ async function update(id: number, params: Partial <CreateEmployeeParams>): Promi
 
     //find user with corresponding email in params
 
-    const user = await db.User.findOne({where: {email: params.email}});
-
+    const user = await db.User.findOne({where: {id: employee.userId}});
+    console.log(user)
     //update employee
     await employee.update({
         userId: user.id,
         position: params.position,
-        deptId: params.deptId,
+        employeeId: params.employeeId,
+        deptId: Number(params.deptId),
         hireDate: params.hireDate
     })
     

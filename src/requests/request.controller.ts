@@ -4,16 +4,24 @@ import Joi, {valid} from 'joi';
 import { validateRequest } from '../_middleware/validateRequest';
 import { requestService } from './request.service';
 import { Status } from '../_helpers/status';
+import { authorizeRole, authenticateToken } from '../_middleware/auth';
 
 const router = Router();
 
-router.get('/', getAll);
-router.get('/:id', getById);
-router.post('/', createSchema, create);
-router.put('/',  updateSchema, update);
-router.delete('/:id', _delete);
+router.get('/', authenticateToken,getAll);
+router.get('/:id', authenticateToken, getById);
+router.get('/users/:id', authenticateToken, getByUserId)
+router.post('/', createSchema,authenticateToken, create);
+router.put('/',  updateSchema, authenticateToken, update);
+router.delete('/:id',authenticateToken, _delete);
 
 export default router;
+
+function getByUserId(req: Request, res: Response, next: NextFunction) : void{
+    requestService.getByUserId(Number(req.params.id))
+        .then(requests => res.json(requests))
+        .catch(next)
+};
 
 function getAll(req: Request, res: Response, next: NextFunction) : void{
     requestService.getAll()

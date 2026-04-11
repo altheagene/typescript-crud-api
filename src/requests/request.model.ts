@@ -40,7 +40,8 @@ export default function (sequelize : Sequelize) : typeof Request{
         userId: {
             type: DataTypes.INTEGER,
             references: {model: 'users', key: 'id'},
-            allowNull: false
+            allowNull: false,
+            onDelete: 'CASCADE'
         },
         status: {
             type: DataTypes.STRING,

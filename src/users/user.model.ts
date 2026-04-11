@@ -5,7 +5,6 @@ export interface UserAttributes{
     id: number;
     email: string;
     passwordHash: string;
-    title: string;
     firstName: string;
     lastName: string;
     role: string;
@@ -24,7 +23,6 @@ export class User
         public id! : number;
         public email! : string;
         public passwordHash! : string;
-        public title! : string;
         public firstName! : string;
         public lastName! : string;
         public role! : string;
@@ -48,10 +46,6 @@ export class User
                     unique: true,
                 },
                 passwordHash: {
-                    type: DataTypes.STRING,
-                    allowNull: false
-                },
-                title:  {
                     type: DataTypes.STRING,
                     allowNull: false
                 },

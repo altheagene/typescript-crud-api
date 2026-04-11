@@ -274,13 +274,15 @@ async function handleRouting(){
 function checkEmpty(inputs){
     let filled = true;
     for(let input of inputs){
+        if (input.name === 'accountId') continue;
         const value = input.type == 'password' ? input.value : input.value.trim();
         if(input.type != 'checkbox' && value == ''){
             input.style.borderColor = 'red'
             input.nextElementSibling.style.color = 'red'
             input.nextElementSibling.textContent = 'This field is required'
             filled = false
-        }else{
+        }else
+        {
             input.style.borderColor = 'gray'
             input.nextElementSibling.textContent = ''
         }
@@ -373,7 +375,7 @@ async function handleRegistration(data){
         return;
     }
 
-    const response = await fetch(`${server}/users`, 
+    const response = await fetch(`${server}/users/register`, 
         {
             method: 'POST',
             headers: {
@@ -384,7 +386,7 @@ async function handleRegistration(data){
                 lastName: data.lastName,
                 role: 'User',
                 title: 'Miss',
-                verified: 'false',
+                verified: false,
                 password: data.password,
                 confirmPassword: data.confirmPassword,
                 email : data.email
@@ -562,8 +564,9 @@ async function saveAccount(){
     )
 
     const accountData = await account.json();
+    console.log(accountData)
     
-    if(account.ok && !editing){
+    if(accountData && !editing){
         const element = document.getElementById('acc-email')
         element.textContent =  'Email already exists!';
         element.previousElementSibling.style.borderColor = 'red';
@@ -579,20 +582,28 @@ async function saveAccount(){
     document.getElementById('form-message-div').classList.add('hide-msg');
 
     if(editing && status){
-        
+        console.log(accountData)
+        console.log(data)
+        console.log(editingEmail)
         if(data.email.trim() != editingEmail){  
-            if(accountData.exists){
+            const res = await fetch(`${server}/users/email/${encodeURIComponent(data.email)}`,
+                {
+                    method: 'GET',
+                    headers: getAuthHeader(),
+                }
+            )
+
+            const resss = await res.json()
+            if(resss){
                 element.textContent =  'Email already exists!';
                 return;
             }
         }else{
             element.innerText =  '';
         }
-
-        console.log(accountData.id)
         console.log(data)
         try{
-            const response = await fetch(`${server}/users/${accountData.id}`, {
+            const response = await fetch(`${server}/users/${data.accountId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type' : 'application/json',
@@ -617,23 +628,31 @@ async function saveAccount(){
         
     }else if(!editing && status){
         //POST INFO TO BACKEND
-        const response = await fetch(`${server}/api/admin/addaccount`,
-            {
-                method: 'POST',
-                headers: {
-                    'Content-Type' : 'application/json',
-                    'Authorization' : `Bearer ${sessionStorage.getItem('authToken')}`
-                },
-                body: JSON.stringify({
-                    firstName: data.firstName.trim(),
-                    lastName: data.lastName.trim(),
-                    email: data.email.trim(),
-                    password: data.password,
-                    role: data.role,
-                    verified: data.verified
-                })
-            }
-        ) 
+        console.log('EY')
+        
+        try{
+            const response = await fetch(`${server}/users`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type' : 'application/json',
+                        'Authorization' : `Bearer ${sessionStorage.getItem('authToken')}`
+                    },
+                    body: JSON.stringify({
+                        firstName: data.firstName.trim(),
+                        lastName: data.lastName.trim(),
+                        email: data.email.trim(),
+                        role: data.role,
+                        title: 'Miss',
+                        verified: data.verified,
+                        password: data.password
+                    })
+                }
+            ) 
+        }catch(err){
+            console.log(err)
+        }
+        
         
         showToast("Successfully added new account!", true);
     }
@@ -646,8 +665,7 @@ async function saveAccount(){
 
 
     editing = false; 
-}
-
+} 
 function passwordValidation(password){
     const length = 6;
     if(password.length < length){
@@ -662,7 +680,7 @@ function emailValidation(email){
     return emailRegEx.test(email);
 }
 
-async function editAccount(id){
+async function editAccount(id, email){
     try {
         document.getElementById('account-label-pass').classList.add('hide-msg')
         editing = true;
@@ -681,6 +699,7 @@ async function editAccount(id){
         console.log('DATA:', data)
 
         if(response.ok){
+            accountsForm.elements['accountId'].value = data.id
             accountsForm.elements['firstName'].value = data.firstName;
             accountsForm.elements['lastName'].value = data.lastName;
             accountsForm.elements['email'].value = data.email;
@@ -696,14 +715,14 @@ async function editAccount(id){
    
 }
 
-async function resetPassword(email){
+async function resetPassword(id){
     const newPassword = prompt("Enter this account's new password. Password length must be minimum of six characters")
     const valid = passwordValidation(newPassword)
     if(!valid){
         alert('Invalid password. Password must be 6 characters long.');
         return;
     }else{
-        const response = await fetch(`${server}/api/admin/resetpassword`,
+        const response = await fetch(`${server}/users/resetpassword/${id}`,
             {
                 method: 'PUT',
                 headers: {
@@ -711,8 +730,7 @@ async function resetPassword(email){
                     'Authorization' : `Bearer ${sessionStorage.getItem('authToken')}`
                 },
                 body: JSON.stringify({
-                    email: email,
-                    password: newPassword
+                    newPassword: newPassword
                 })
             }
         )
@@ -780,8 +798,8 @@ async function renderAccounts(){
                     <td>${account.role =='Admin' ? 'Admin' : 'User'}</td>
                     <td>${account.verified ? '✅' : ' ❌'}</td>
                     <td>
-                        <button class="btn btn-outline-primary" onclick="editAccount('${account.id}')">Edit</button>
-                        <button class="btn btn-outline-warning" onclick="resetPassword('${account.email}')">Reset Password</button>
+                        <button class="btn btn-outline-primary" onclick="editAccount('${account.id}', '${account.email}')">Edit</button>
+                        <button class="btn btn-outline-warning" onclick="resetPassword('${account.id}')">Reset Password</button>
                         <button class="btn btn-outline-danger" onclick="deleteAccount('${account.id}')">Delete</button>
                     </td>
                 </tr>
@@ -825,7 +843,7 @@ async function saveEmployee() {
         }
 
         // Call backend to add employee
-        const response = await fetch(`${server}/api/admin/addemployee`, {
+        const response = await fetch(`${server}/employees`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -835,7 +853,7 @@ async function saveEmployee() {
                 employeeId: data.employeeId,
                 email: data.email,
                 position: data.position,
-                deptId: parseInt(data.deptId),
+                deptId:  Number(data.deptId),
                 hireDate: data.hireDate
             })
         });
@@ -843,7 +861,7 @@ async function saveEmployee() {
         const resData = await response.json();
 
         // Handle backend validation messages
-        if (!resData.accountExists) {
+        if (!response.ok) {
             emailElement.textContent = 'This email does not have an account!';
             return;
         } else if (resData.employeeExists && resData.message.includes('Employee ID')) {
@@ -869,7 +887,8 @@ async function saveEmployee() {
 
 async function saveEditEmployee(data){
     try{
-        const response = await fetch(`${server}/api/admin/saveemployeeedits`, {
+        console.log(typeof(Number(data.deptId)))
+        const response = await fetch(`${server}/employees/${encodeURIComponent(data.id)}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -880,7 +899,7 @@ async function saveEditEmployee(data){
                 employeeId: data.employeeId,
                 email: data.email,
                 position: data.position,
-                deptId: parseInt(data.deptId),
+                deptId: Number(data.deptId),
                 hireDate: data.hireDate
             })
         });
@@ -905,8 +924,9 @@ async function saveEditEmployee(data){
 async function editEmployee(id){
     editing = true;
     employeeEmailLabel.classList.add('hide-msg');
+    console.log('HELLO')
     try{
-        const response = await fetch(`${server}/api/admin/getemployee?id=${encodeURIComponent(id)}`,
+        const response = await fetch(`${server}/employees/${encodeURIComponent(id)}`,
             {
                 method: 'GET',
                 headers: getAuthHeader()
@@ -914,19 +934,19 @@ async function editEmployee(id){
         )
         const data = await response.json();
 
-        const employee = data.employee;
-        console.log(employee)
-        employeesForm.elements['id'].value = employee.id;
-        employeesForm.elements['employeeId'].value = employee.employeeID;
-        employeesForm.elements['email'].value = employee.email;
-        employeesForm.elements['position'].value = employee.position;
-        employeesForm.elements['deptId'].value = employee.departmentId;
+        
+        
+        employeesForm.elements['id'].value = data.id;
+        employeesForm.elements['employeeId'].value = data.employeeId;
+        employeesForm.elements['email'].value = data.email;
+        employeesForm.elements['position'].value = data.position;
+        employeesForm.elements['deptId'].value = data.deptId;
        
         employeesForm.elements['hireDate'].value =
-            new Date(employee.hireDate).toISOString().split('T')[0];
+            new Date(data.hireDate).toISOString().split('T')[0];
         myEmployeeModal.show();
     }catch(err){
-
+        console.log(err)
     }
     
     
@@ -938,7 +958,7 @@ async function deleteEmployee(id){
 
     try {
         // Send DELETE request using URL param
-        const response = await fetch(`${server}/api/admin/deleteemployee/${id}`, {
+        const response = await fetch(`${server}/employees/${id}`, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${sessionStorage.getItem('authToken')}`
@@ -1036,7 +1056,7 @@ async function renderDeptDropdown(){
     employeesForm.elements['deptId'].innerHTML = ''
     for(let department of data){
         const element = `
-            <option value=${department.deptId}>${department.name}</option>
+            <option value=${department.id}>${department.name}</option>
         `
 
         employeesForm.elements['deptId'].innerHTML += element;
@@ -1049,7 +1069,8 @@ async function renderRequests(){
     const tbody = document.getElementById('requests-tbody');
     tbody.innerHTML = '';
 
-    const response = await fetch(`${server}/api/requests`, {
+    const id = sessionStorage.getItem('id')
+    const response = await fetch(`${server}/requests/users/${id}`, {
         method: 'GET',
         headers: getAuthHeader()
     });
@@ -1057,21 +1078,21 @@ async function renderRequests(){
     const data = await response.json();
 
     if(response.ok){
-        if(data.myRequests.length > 0){
+        if(data.length > 0){
             document.getElementById('no-requests-div').classList.add('hide-msg');
             document.getElementById('requests-table').classList.remove('hide-msg');
 
-            for (let request of data.myRequests){
+            for (let request of data){
                 const statusClass = 
                     request.status == 'Pending' ? 'bg-warning' :
                     request.status == 'Approved' ? 'bg-success' :
                     request.status == 'Rejected' ? 'bg-danger' :
                     'bg-secondary';
-                const date =  new Date(request.dateFiled).toISOString().split('T')[0];
+                const date =  new Date(request.createdAt).toISOString().split('T')[0];
 
                 const element = `
                     <tr>
-                        <td>${request.requestId}</td>
+                        <td>${request.id}</td>
                         <td>${request.type}</td>
                         <td>${date}</td>
                         <td><span class="badge ${statusClass}">${request.status}</span></td>
@@ -1178,22 +1199,26 @@ async function saveItems(){
         }
 
         itemRequests.push({
-            itemName: item,
+            item: item,
             quantity: qty
         });
     }
 
     msgDdiv.classList.add('hide-msg');
 
+    const id = sessionStorage.getItem('id');
+
     // Prepare data to send to server
     const requestData = {
         type: document.getElementById('equipment-type').value,
         dateFiled: new Date().toISOString().split('T')[0],
-        items: itemRequests
+        items: itemRequests,
+        userId: id,
+        status: 'Pending'
     };
 
     try {
-        const response = await fetch(`${server}/api/addrequest`, {
+        const response = await fetch(`${server}/requests`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

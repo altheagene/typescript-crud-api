@@ -7,6 +7,7 @@ import employeesController from './employees/employee.controller';
 import departmentsController from './departments/department.controller';
 import requestsController from './requests/request.controller'
 import requestItemController from './requestItems/requestItem.controller'
+import { authenticateToken } from '_middleware/auth';
 
 const app: Application = express();
 
