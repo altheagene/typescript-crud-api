@@ -61,11 +61,7 @@ async function update(id: number, params: Partial <CreateEmployeeParams>): Promi
     console.log(user)
     //update employee
     await employee.update({
-        userId: user.id,
-        position: params.position,
-        employeeId: params.employeeId,
-        deptId: Number(params.deptId),
-        hireDate: params.hireDate
+      ...params
     })
     
 }

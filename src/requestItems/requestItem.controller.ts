@@ -3,7 +3,6 @@ import {Router} from 'express';
 import Joi, {valid} from 'joi';
 import { validateRequest } from '../_middleware/validateRequest';
 import { requestItemServices } from './requestItem.services';
-import { get } from 'node:http';
 
 const router = Router();
 

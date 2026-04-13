@@ -454,7 +454,36 @@
                 </table>
             </div>
             
+            <div class="modal fade" id="request-items-modal" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
 
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                Request Items
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+
+                        <div class="modal-body">
+
+                            <div id="request-items-msg" class="text-danger mb-2"></div>
+
+                            <ul id="request-items-list" class="list-group">
+                                <!-- items will be injected here -->
+                            </ul>
+
+                        </div>
+
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" data-bs-dismiss="modal">
+                                Close
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
             <div class="modal" id="request-modal">
                 <div class="modal-dialog">
                     <div class="modal-content">

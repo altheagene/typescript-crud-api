@@ -1,7 +1,5 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import type {Sequelize} from "sequelize";
-import {User} from '../users/user.model';
-import { Department } from "../departments/department.model";
 
 export interface EmployeeAttributes{
     id: number,

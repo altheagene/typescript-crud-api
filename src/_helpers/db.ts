@@ -37,6 +37,7 @@ export async function initialize(): Promise<void>{
 
     db.Employee.belongsTo(db.User, {foreignKey: 'userId'});
     db.Employee.belongsTo(db.Department, {foreignKey: 'deptId'});
+    db.Request.hasMany(db.RequestItem)
     db.RequestItem.belongsTo(db.Request, {foreignKey: 'requestId'})
 
     await sequelize.sync();

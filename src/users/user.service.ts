@@ -101,9 +101,6 @@ async function update(id : number, params: Partial <UserCreationAttributes> & {p
         params.passwordHash = await bcrypt.hash(params.password, 10);
         delete params.password;
     }
-
-    console.log('hello')
-    console.log(params)
     
     //Update user
     await user.update(params as Partial<UserCreationAttributes>);

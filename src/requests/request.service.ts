@@ -19,11 +19,24 @@ async function getAll(): Promise<Request[]>{
 }
 
 async function getById(id: number): Promise<Request>{
-    return await db.Request.findByPk(id);
+    return await db.Request.findByPk(id, {
+        include: [
+            {
+                model: db.RequestItem
+            }
+        ]
+});
 }
 
-async function getByUserId(id:number) : Promise<Request[]>{
-    return await db.Request.findAll({where: {userId: id}})
+async function getByUserId(id: number): Promise<Request[]> {
+    return await db.Request.findAll({
+        where: { userId: id },
+        include: [
+            {
+                model: db.RequestItem
+            }
+        ]
+    });
 }
 
 async function create(params: requestWithItems) : Promise<void>{

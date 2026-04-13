@@ -1,4 +1,4 @@
-import { DataType, DataTypes, Model, Optional } from "sequelize";
+import { DataTypes, Model, Optional } from "sequelize";
 import type {Sequelize} from "sequelize";
 
 export interface RequestItemAttributes{

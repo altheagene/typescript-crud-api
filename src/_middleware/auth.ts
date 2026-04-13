@@ -1,10 +1,6 @@
 import {Request, Response, NextFunction} from 'express';
 import jwt from 'jsonwebtoken';
 
-interface AuthRequest extends Request{
-    user?:any 
-}
-
 const JWT_SECRET  = 'myS3cr3tk3y'
 
 export function authenticateToken(  req: Request,res: Response,next: NextFunction){

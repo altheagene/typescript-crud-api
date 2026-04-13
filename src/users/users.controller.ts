@@ -13,7 +13,7 @@ router.get('/', getAll);
 router.get('/:id', getById);
 router.get('/email/:email', getByEmail);
 router.post('/login', login);
-router.post('/verify', verify);
+router.put('/verify', verify);
 router.post('/',authenticateToken, authorizeRole('Admin'), createSchema, create);
 router.post('/register', registerSchema, create);
 router.put('/:id', authenticateToken, authorizeRole('Admin'), updateSchema, update);

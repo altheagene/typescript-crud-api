@@ -28,7 +28,7 @@ const myRequestModal = new bootstrap.Modal(requestModal);
 const modalArr = document.querySelectorAll('.modal');
 
 modalArr.forEach(modal => modal.addEventListener('show.bs.modal', () => {
-    modal.querySelector('.modal-title').textContent = editing ? 'Edit' : 'Add'
+    modal.querySelector('.modal-title').textContent = editing ? 'Edit' : editing?  'Add' : 'Request Items'
 }))
 
 modalArr.forEach(modal => modal.addEventListener('hidden.bs.modal', () => {
@@ -406,7 +406,7 @@ async function handleRegistration(data){
 async function handleVerification(){
     const response = await fetch(`${server}/users/verify`,
         {
-            method: 'POST',
+            method: 'PUT',
             headers: {
                 'Content-Type' : 'application/json'
             },
@@ -1096,6 +1096,12 @@ async function renderRequests(){
                         <td>${request.type}</td>
                         <td>${date}</td>
                         <td><span class="badge ${statusClass}">${request.status}</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary"
+                                onclick="viewRequestItems(${request.id})">
+                                View Items
+                            </button>
+                        </td>
                     </tr>
                 `;
                 tbody.innerHTML += element;
@@ -1109,6 +1115,54 @@ async function renderRequests(){
     }else{
         console.log('ERROR!');
         return false;
+    }
+}
+
+async function viewRequestItems(requestId) {
+    const list = document.getElementById('request-items-list');
+    const msg = document.getElementById('request-items-msg');
+
+    list.innerHTML = '';
+    msg.textContent = '';
+
+    try {
+        const response = await fetch(`${server}/requests/${requestId}`, {
+            headers: getAuthHeader()
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            msg.textContent = 'Failed to load request items';
+            return;
+        }
+
+        const items = data.RequestItems || data.requestItems || [];
+
+        if (items.length === 0) {
+            msg.textContent = 'No items found for this request.';
+        }
+
+        items.forEach(item => {
+            list.innerHTML += `
+                <li class="list-group-item d-flex justify-content-between">
+                    <span>${item.item}</span>
+                    <span class="badge bg-primary rounded-pill">
+                        ${item.quantity}
+                    </span>
+                </li>
+            `;
+        });
+
+        const modal = new bootstrap.Modal(
+            document.getElementById('request-items-modal')
+        );
+
+        modal.show();
+
+    } catch (err) {
+        console.log(err);
+        msg.textContent = 'Server error while loading items';
     }
 }
 
