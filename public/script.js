@@ -25,6 +25,12 @@ const myEmployeeModal = new bootstrap.Modal(employeeModal);
 const requestModal = document.getElementById('request-modal');
 const myRequestModal = new bootstrap.Modal(requestModal);
 
+const departmentsModal = document.getElementById('departments-modal');
+const myDepartmentsModal = new bootstrap.Modal(departmentsModal);
+
+const departmentsForm = document.getElementById('departments-form');
+const saveDepartmentBtn = document.getElementById('save-department');
+
 const modalArr = document.querySelectorAll('.modal');
 
 modalArr.forEach(modal => modal.addEventListener('show.bs.modal', () => {
@@ -1303,7 +1309,45 @@ async function saveItems(){
 // ================ DEPARTMENTS-JS ===========================
 
 function addDepartment(){
-    alert('Not implemented.')
+    resetInputs(departmentsForm);
+    myDepartmentsModal.show();
+}
+
+saveDepartmentBtn.addEventListener('click', saveDepartment);
+
+async function saveDepartment(){
+    const formData = new FormData(departmentsForm);
+    const data = Object.fromEntries(formData);
+
+    if(!data.name || !data.description){
+        alert("Please fill all fields");
+        return;
+    }
+
+    try{
+        const response = await fetch(`${server}/departments`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${sessionStorage.getItem('authToken')}`
+            },
+            body: JSON.stringify(data)
+        });
+
+        const res = await response.json();
+
+        if(response.ok){
+            showToast("Department added successfully!", true);
+            myDepartmentsModal.hide();
+            renderDepartments();
+        }else{
+            showToast(res.message || "Failed to add department", false);
+        }
+
+    }catch(err){
+        console.log(err);
+        showToast("Server error!", false);
+    }
 }
 
 async function renderDepartments(){
@@ -1317,7 +1361,7 @@ async function renderDepartments(){
     const data = await response.json();
     console.log(data)
     if(response.ok){
-        const departments = data.departments;
+        const departments = data.departments || data;
         const tbody = document.getElementById('dept-tbody');
         tbody.innerHTML = ''
         for (let i = 0; i < data.length; i++){
